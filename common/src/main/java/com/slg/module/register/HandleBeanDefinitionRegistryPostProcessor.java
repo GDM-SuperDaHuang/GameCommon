@@ -12,22 +12,23 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class HandleBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
     //pd对象
-    private final Map<Integer, Class<?>> classRespMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Class<?>> classRespMap = new HashMap<>();
 
     //pb序列化方法
-    private final Map<Integer, Method> parseFromMethodMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Method> parseFromMethodMap = new HashMap<>();
 
     //handle处理类
-    private final Map<Integer, Class<?>> handleMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Class<?>> handleMap = new HashMap<>();
 
     //handle目标方法
-    private final Map<Integer, Method> methodMap = new ConcurrentHashMap<>();
+    private final Map<Integer, Method> methodMap = new HashMap<>();
     private final String[] basePackages = new String[]{""};
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {

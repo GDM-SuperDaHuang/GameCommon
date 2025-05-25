@@ -42,6 +42,7 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.113.Final</version>
         </dependency>
+
         <dependency>
             <groupId>com.slg.module</groupId>
             <artifactId>protobufFile</artifactId>
