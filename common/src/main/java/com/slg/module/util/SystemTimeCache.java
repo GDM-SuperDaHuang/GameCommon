@@ -4,7 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-//本地时间工具 5s 误差
+//本地时间工具 1s 误差
 public class SystemTimeCache {
     private static volatile long currentTimeMillis;
     static {
@@ -13,7 +13,7 @@ public class SystemTimeCache {
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(() ->
                         currentTimeMillis = System.currentTimeMillis(),
-                0, 3000, TimeUnit.MILLISECONDS
+                0, 1000, TimeUnit.MILLISECONDS
         );
     }
 

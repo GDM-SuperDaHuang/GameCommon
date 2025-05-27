@@ -9,17 +9,15 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
-
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class HandleBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
+public final class HandleBeanDefinitionRegistryPostProcessor implements BeanDefinitionRegistryPostProcessor {
     //pd对象
-    private final Map<Integer, Class<?>> classRespMap = new HashMap<>();
+//    private final Map<Integer, Class<?>> classRespMap = new HashMap<>();
 
     //pb序列化方法
     private final Map<Integer, Method> parseFromMethodMap = new HashMap<>();
@@ -30,6 +28,7 @@ public class HandleBeanDefinitionRegistryPostProcessor implements BeanDefinition
     //handle目标方法
     private final Map<Integer, Method> methodMap = new HashMap<>();
     private final String[] basePackages = new String[]{""};
+
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
@@ -57,7 +56,7 @@ public class HandleBeanDefinitionRegistryPostProcessor implements BeanDefinition
 //                            Class<?> parameterRespType = parameterTypes[2];
 //                            classRespMap.put(key, parameterRespType);
                             handleMap.putIfAbsent(key, clazz);
-                            methodMap.put(key,method);
+                            methodMap.put(key, method);
                             try {
 //                                Method parseFromMethod = parameterType.getMethod("parseFrom", byte[].class);
                                 Method parseFromMethod = parameterReqType.getMethod("parseFrom", ByteBuffer.class);
@@ -76,20 +75,20 @@ public class HandleBeanDefinitionRegistryPostProcessor implements BeanDefinition
     public void postProcessBeanFactory(org.springframework.beans.factory.config.ConfigurableListableBeanFactory beanFactory) throws BeansException {
     }
 
-    public Method getParseFromMethod (Integer key) {
+    public Method getParseFromMethod(Integer key) {
         return parseFromMethodMap.getOrDefault(key, null);
     }
 
 
     public Class<?> getHandleMap(Integer key) {
-        return handleMap.getOrDefault(key,null);
+        return handleMap.getOrDefault(key, null);
     }
 
     public Method getMethodMap(Integer key) {
-        return methodMap.getOrDefault(key,null);
+        return methodMap.getOrDefault(key, null);
     }
 
-    public Map<Integer, Class<?>> getClassRespMap() {
-        return classRespMap;
-    }
+//    public Map<Integer, Class<?>> getClassRespMap() {
+//        return classRespMap;
+//    }
 }
