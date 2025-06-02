@@ -1,0 +1,153 @@
+===================================密钥交换流程==============================
+客户端:
+1，选择私钥 a (随机数，1 < a < p-1)
+2，发送,g,A给服务端，(其中计算公钥 A = g^a mod p)
+
+服务端:
+1,选择私钥 b (随机数，1 < b < p-1)
+2,计算公钥 B,并发送B给客户端,(其中计算公钥 B = g^b mod p)
+
+校验K:
+共享密钥计算:
+客户端: K = B^a mod p = (g^b)^a mod p = g^(ab) mod p
+服务端: K = A^b mod p = (g^a)^b mod p = g^(ab) mod p
+
+===================================密钥验证流程==============================
+HMAC 校验（更安全）
+密钥验证：
+对特定的消息进行加密/解密
+从共享密钥生成 AES 密钥:
+将 BigInteger 类型的共享密钥转换为字节数组
+使用 SHA-256 哈希算法对密钥字节进行哈希处理
+基于哈希结果创建 SecretKeySpec 对象作为 AES 密钥
+
+加密：
+创建 Cipher 实例，使用指定的转换方案
+生成随机的 16 字节初始化向量(IV)
+使用密钥和 IV 初始化 Cipher 为加密模式
+加密消息内容
+将 IV 和加密后的数据合并为一个字节数组(IV在前，加密数据在后)
+
+解密:
+从加密消息中提取前 16 字节作为 IV
+剩余部分作为实际的加密数据
+使用相同的密钥和提取的 IV 初始化 Cipher 为解密模式
+执行解密操作
+将解密结果转换为字符串返回
+
+检查 内容是否相同，如果一致则密钥校验通过。
+
+===========================协议============================================================
+//公钥交换请求
+message KeyExchangeReq {
+    bytes g = 1;   // 生成元
+    bytes p = 2;   // 素数
+    bytes public_key = 3; // 公钥
+}
+
+//公钥交换响应
+message KeyExchangeResp {
+    bytes public_key = 1;   //公钥
+}
+
+// 用共享密钥加密测试验证请求
+message KeyVerificationReq {
+    bytes test_message = 1;  // 用共享密钥加密的测试消息
+}
+// 用共享密钥加密测试验证响应
+message KeyVerificationResp {
+    bool success = 1;                  // 验证是否成功
+    bytes encrypted_echo = 2;          // 服务端返回的加密回显(可选)
+    string error_message = 3;          // 失败时的错误信息
+}
+
+==================================示例===========================================================
+using System;
+using System.Security.Cryptography;
+using System.Text;
+
+public class CryptoUtils
+{
+    private const int IV_SIZE = 16;//这个随机
+    private const int KEY_SIZE = 256; // AES-256
+
+    // 从共享密钥生成AES密钥(与Java后端兼容)
+    public static byte[] GenerateAesKey(BigInteger sharedKey)
+    {
+        byte[] keyBytes = sharedKey.ToByteArray();
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            return sha256.ComputeHash(keyBytes);
+        }
+    }
+
+    // 加密方法(与Java后端兼容)
+    public static byte[] Encrypt(byte[] key, string message)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = key;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            // 生成随机IV
+            aes.GenerateIV();
+            byte[] iv = aes.IV;
+
+            using (ICryptoTransform encryptor = aes.CreateEncryptor())
+            {
+                byte[] encrypted = encryptor.TransformFinalBlock(
+                    Encoding.UTF8.GetBytes(message), 0, message.Length);
+
+                // 合并IV和加密数据
+                byte[] combined = new byte[iv.Length + encrypted.Length];
+                Buffer.BlockCopy(iv, 0, combined, 0, iv.Length);
+                Buffer.BlockCopy(encrypted, 0, combined, iv.Length, encrypted.Length);
+
+                return combined;
+            }
+        }
+    }
+
+    // 解密方法(与后端兼容)
+    public static string Decrypt(byte[] key, byte[] encryptedMessage)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = key;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            // 提取IV(前16字节)
+            byte[] iv = new byte[IV_SIZE];
+            Array.Copy(encryptedMessage, 0, iv, 0, iv.Length);
+            aes.IV = iv;
+
+            // 提取加密数据
+            byte[] encrypted = new byte[encryptedMessage.Length - iv.Length];
+            Array.Copy(encryptedMessage, iv.Length, encrypted, 0, encrypted.Length);
+
+            using (ICryptoTransform decryptor = aes.CreateDecryptor())
+            {
+                byte[] decrypted = decryptor.TransformFinalBlock(encrypted, 0, encrypted.Length);
+                return Encoding.UTF8.GetString(decrypted);
+            }
+        }
+    }
+}
+
+
+// 假设已通过密钥交换获得共享密钥
+BigInteger sharedKey = BigInteger.Parse("12345678901234567890");
+
+// 生成AES密钥
+byte[] aesKey = CryptoUtils.GenerateAesKey(sharedKey);
+
+// 加密
+string message = "Hello from C#!";
+byte[] encrypted = CryptoUtils.Encrypt(aesKey, message);
+string base64Encrypted = Convert.ToBase64String(encrypted);
+
+// 解密
+byte[] encryptedData = Convert.FromBase64String(base64Encrypted);
+string decrypted = CryptoUtils.Decrypt(aesKey, encryptedData);

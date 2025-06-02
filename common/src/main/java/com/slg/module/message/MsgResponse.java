@@ -8,6 +8,10 @@ import java.util.Objects;
 public class MsgResponse {
     private int errorCode;
     private GeneratedMessage.Builder<?> body;
+    private byte flag;//先压缩后加密原则
+    //0000 0011:压缩+加密
+    //0000 0001:加密
+    //0000 0010:压缩
 
     private static final Recycler<MsgResponse> RECYCLER = new Recycler<MsgResponse>() {
         @Override
@@ -30,7 +34,7 @@ public class MsgResponse {
         msg.body = body;
         return msg;
     }
-    
+
     public static MsgResponse newInstance(int errorCode) {
         MsgResponse msg = RECYCLER.get();
         msg.errorCode = errorCode;
@@ -38,8 +42,37 @@ public class MsgResponse {
         return msg;
     }
 
+    public static MsgResponse newInstance(GeneratedMessage.Builder<?> body, boolean encrypted) {
+        MsgResponse msg = RECYCLER.get();
+        msg.errorCode = ErrorCodeConstants.SUCCESS;
+        msg.body = body;
+        byte msgFlag = msg.flag;
+        if (encrypted) {
+            msgFlag |= Constants.ENCRYPTION_MASK; // 设置加密位
+        }
+        msg.flag = msgFlag;
+        return msg;
+    }
+
+    // 检查是否加密
+    public boolean isEncrypted() {
+        return (flag & Constants.ENCRYPTION_MASK) != 0;
+    }
+
+
+    // 设置加密标志
+    public byte setEncrypted(boolean encrypted) {
+        if (encrypted) {
+            flag |= Constants.ENCRYPTION_MASK; // 设置加密位
+        } else {
+            flag &= ~Constants.ENCRYPTION_MASK; // 清除加密位
+        }
+        return flag;
+    }
+
     // 回收对象
     public void recycle() {
+        flag = 0;
         errorCode = 0;
         body = null;
         handle.recycle(this);
@@ -52,6 +85,14 @@ public class MsgResponse {
 
     public void setErrorCode(int errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public void setFlag(byte flag) {
+        this.flag = flag;
+    }
+
+    public byte getFlag() {
+        return flag;
     }
 
     public GeneratedMessage.Builder<?> getBody() {

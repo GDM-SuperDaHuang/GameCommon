@@ -17,14 +17,27 @@ import "monon.proto";
 服务端: K = A^b mod p = (g^a)^b mod p = g^(ab) mod p
 
 HMAC 校验（更安全）
-客户端：
-从 共享密钥K 派生一个 HMAC 密钥（如 HMAC_KEY = SHA256(K || "CLIENT")）。
-对测试消息 "DH_VERIFY" 计算 HMAC，得到 H1。
-发送 H1 给服务端。
+密钥验证：
+对特定的消息进行加密/解密
+从共享密钥生成 AES 密钥:
+将 BigInteger 类型的共享密钥转换为字节数组
+使用 SHA-256 哈希算法对密钥字节进行哈希处理
+基于哈希结果创建 SecretKeySpec 对象作为 AES 密钥
 
-服务端：
-从 共享密钥K 派生相同的 HMAC 密钥（HMAC_KEY = SHA256(K || "CLIENT")）。
-对 "DH_VERIFY" 计算 HMAC，得到 H2。
+加密：
+创建 Cipher 实例，使用指定的转换方案
+生成随机的 16 字节初始化向量(IV)
+使用密钥和 IV 初始化 Cipher 为加密模式
+加密消息内容
+将 IV 和加密后的数据合并为一个字节数组(IV在前，加密数据在后)
+
+解密:
+从加密消息中提取前 16 字节作为 IV
+剩余部分作为实际的加密数据
+使用相同的密钥和提取的 IV 初始化 Cipher 为解密模式
+执行解密操作
+将解密结果转换为字符串返回
+
 检查 H1 == H2，如果一致则密钥校验通过。
 */
 
@@ -33,6 +46,7 @@ message KeyExchangeReq {
     bytes g = 1;   // 生成元
     bytes p = 2;   // 素数
     bytes public_key = 3; // 公钥
+    int IV=4;//字节长度
 }
 
 //公钥交换响应

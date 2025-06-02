@@ -13,6 +13,8 @@ public final class ErrorCodeConstants {
     public static final int SERIALIZATION_METHOD_LACK = 1;//序列化方法缺失
     public static final int ESTABLISH_CONNECTION_FAILED = 2;//建立连接失败
     public static final int GATE_FORWARDING_FAILED = 3;//网关转发失败
+    public static final int NOT_LOGGED_IN = 4;//未登录
+
 
     // 数据库相关错误码
     public static final int DATABASE_CONNECTION_ERROR = 1100;
