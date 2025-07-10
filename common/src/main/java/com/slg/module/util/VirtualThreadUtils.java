@@ -8,57 +8,63 @@ import java.util.concurrent.ThreadFactory;
 
 public class VirtualThreadUtils {
 
-    /**
-     * 创建虚拟线程执行器
-     * （每个任务分配独立虚拟线程）
-     */
-    public static ExecutorService newVirtualThreadPerTaskExecutor() {
+      // 创建固定数量平台线程的 executor，用于执行阻塞操作
+    public static ExecutorService createFixedExecutor(int threadCount) {
+        return Executors.newFixedThreadPool(threadCount);
+    }
+
+    // 创建基于 ForkJoinPool 的 executor
+    public static ExecutorService createWorkStealingExecutor() {
+        return Executors.newWorkStealingPool();
+    }
+
+    // 使用平台线程执行器创建虚拟线程
+    public static Thread startVirtualThread(Runnable task, ExecutorService executor) {
+        Thread virtualThread = Thread.ofVirtual()
+                .name("virtual-thread-")
+                .unstarted(() -> {
+                    try (var ignored = executor) {
+                        task.run();
+                    }
+                });
+        virtualThread.start();
+        return virtualThread;
+    }
+
+    // 创建虚拟线程执行器服务
+    public static ExecutorService createVirtualThreadExecutor() {
         return Executors.newVirtualThreadPerTaskExecutor();
     }
 
-    /**
-     * 创建固定数量的虚拟线程执行器
-     * @param concurrency 最大并发虚拟线程数
-     */
-    public static ExecutorService newFixedVirtualThreadPool(int concurrency) {
-        ThreadFactory factory = Thread.ofVirtual().factory();
-        return Executors.newThreadPerTaskExecutor(factory);
-        // 注意：实际并发由任务数量决定，参数仅用于命名
+    // 提交任务到虚拟线程执行器并获取 Future
+    public static <T> Future<T> submitTask(ExecutorService executor, Supplier<T> task) {
+        return executor.submit(task::get);
     }
 
-    /**
-     * 使用虚拟线程执行任务
-     * @param task 待执行任务
-     */
-    public static void execute(Runnable task) {
-        Thread.ofVirtual().start(task);
+    // 运行阻塞任务示例
+    public static <T> CompletableFuture<T> runBlockingTask(Supplier<T> blockingTask, ExecutorService executor) {
+        return CompletableFuture.supplyAsync(blockingTask, executor);
     }
 
-    /**
-     * 批量执行任务并等待完成
-     * @param tasks 任务列表
-     */
-    public static void executeAll(List<Runnable> tasks) throws InterruptedException {
-        List<Thread> threads = new ArrayList<>();
-        for (Runnable task : tasks) {
-            threads.add(Thread.ofVirtual().unstarted(task));
-        }
-        
-        threads.forEach(Thread::start);
-        
-        for (Thread thread : threads) {
-            thread.join();
+    // 优雅关闭执行器
+    public static void shutdownExecutor(ExecutorService executor) {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(10, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
         }
     }
 
-    /**
-     * 带返回值的虚拟线程执行
-     * @param task Callable任务
-     * @return Future对象
-     */
-    public static <T> Future<T> submit(Callable<T> task) {
-        try (var executor = newVirtualThreadPerTaskExecutor()) {
-            return executor.submit(task);
+    // 模拟长时间运行的阻塞操作
+    public static void simulateBlockingOperation(Duration duration) {
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }
