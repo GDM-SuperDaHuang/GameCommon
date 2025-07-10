@@ -67,4 +67,42 @@ public class VirtualThreadUtils {
             Thread.currentThread().interrupt();
         }
     }
+      ///
+        // // 示例1：创建固定平台线程执行器
+        // ExecutorService fixedExecutor = VirtualThreadUtils.createFixedExecutor(10);
+
+        // // 示例2：使用平台线程执行器启动虚拟线程
+        // Thread virtualThread = VirtualThreadUtils.startVirtualThread(() -> {
+        //     System.out.println("虚拟线程运行中: " + Thread.currentThread());
+        //     VirtualThreadUtils.simulateBlockingOperation(Duration.ofSeconds(2));
+        //     System.out.println("虚拟线程执行完成");
+        // }, fixedExecutor);
+
+        // virtualThread.join();
+
+        // // 示例3：创建虚拟线程执行器
+        // ExecutorService virtualExecutor = VirtualThreadUtils.createVirtualThreadExecutor();
+
+        // // 示例4：提交任务到虚拟线程执行器
+        // Future<String> future = VirtualThreadUtils.submitTask(virtualExecutor, () -> {
+        //     System.out.println("任务在虚拟线程中执行: " + Thread.currentThread());
+        //     VirtualThreadUtils.simulateBlockingOperation(Duration.ofSeconds(1));
+        //     return "任务结果";
+        // });
+
+        // System.out.println("任务结果: " + future.get());
+
+        // // 示例5：运行阻塞任务
+        // CompletableFuture<String> blockingFuture = VirtualThreadUtils.runBlockingTask(() -> {
+        //     System.out.println("阻塞任务在平台线程中执行: " + Thread.currentThread());
+        //     VirtualThreadUtils.simulateBlockingOperation(Duration.ofSeconds(3));
+        //     return "阻塞任务结果";
+        // }, fixedExecutor);
+
+        // System.out.println("阻塞任务结果: " + blockingFuture.get());
+
+        // // 示例6：关闭执行器
+        // VirtualThreadUtils.shutdownExecutor(fixedExecutor);
+        // VirtualThreadUtils.shutdownExecutor(virtualExecutor);
+      
 }
