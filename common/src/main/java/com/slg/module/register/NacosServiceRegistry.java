@@ -10,7 +10,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Properties;
-
+//<dependency>
+//     <groupId>com.alibaba.nacos</groupId>
+//     <artifactId>nacos-client</artifactId>
+//     <version>3.0.2</version>
+// </dependency>
 /**
  * Nacos服务注册与发现组件
  */
