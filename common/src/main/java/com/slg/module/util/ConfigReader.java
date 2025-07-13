@@ -8,13 +8,15 @@ public class ConfigReader {
     private final Properties properties;
 
     // 构造函数：通过文件名加载配置文件
-    public ConfigReader(String fileName) throws IOException {
+    public ConfigReader(String fileName)  {
         properties = new Properties();
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileName)) {
             if (inputStream == null) {
                 throw new IOException("无法加载配置文件: " + fileName);
             }
             properties.load(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

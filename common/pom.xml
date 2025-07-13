@@ -40,7 +40,7 @@
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.113.Final</version>
+            <version>4.2.2.Final</version>
         </dependency>
 
         <dependency>
@@ -76,6 +76,19 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
             <version>1.80</version>
+        </dependency>
+
+<!--        <dependency>-->
+<!--            <groupId>org.agrona</groupId>-->
+<!--            <artifactId>agrona</artifactId>-->
+<!--            <version>2.2.4</version>-->
+<!--        </dependency>-->
+
+        <!-- nacos -->
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+            <version>3.0.2</version>
         </dependency>
 
     </dependencies>

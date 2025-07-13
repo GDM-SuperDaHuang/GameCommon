@@ -6,6 +6,11 @@ public final class Constants {
     private Constants() {
     }
 
+    public static final String ProtoMinId = "min";
+    public static final String ProtoMaxId = "max";
+    public static final String GroupId = "g";
+    public static final String ServerId = "s";
+
     // 标志位掩码
     public static final byte COMPRESSION_MASK = 0b00000010; // 压缩标志位
     public static final byte ENCRYPTION_MASK = 0b00000001;  // 加密标志位
