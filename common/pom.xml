@@ -78,18 +78,12 @@
             <version>1.80</version>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.agrona</groupId>-->
-<!--            <artifactId>agrona</artifactId>-->
-<!--            <version>2.2.4</version>-->
-<!--        </dependency>-->
-
-        <!-- nacos -->
-        <dependency>
-            <groupId>com.alibaba.nacos</groupId>
-            <artifactId>nacos-client</artifactId>
-            <version>3.0.2</version>
-        </dependency>
+         <!-- nacos客户端-->
+         <dependency>
+              <groupId>com.alibaba.nacos</groupId>
+              <artifactId>nacos-client</artifactId>
+              <version>3.0.2</version>
+         </dependency>
 
     </dependencies>
 
