@@ -19,6 +19,7 @@ public class ServerConfigManager {
     //有序从小到大排序
     private List<List<ServerConfig>> serverConfigList = new ArrayList<>();
 
+    private HashMap<Integer, Integer> protoGroupMap = new HashMap<>();//protoId-groupId
 
     private ServerConfigManager(String serviceName, String groupName, String configName, String excludeInstanceId) {
         this.init(serviceName, groupName, configName, excludeInstanceId);
@@ -95,6 +96,16 @@ public class ServerConfigManager {
         //排序
         // 执行排序和分组操作
         serverConfigList = sortAndGroupByMinProtoId(serverConfigMap);
+        for (List<ServerConfig> serverConfigs : serverConfigList) {
+            for (ServerConfig serverConfig : serverConfigs) {
+                int groupId = serverConfig.getGroupId();
+                int minProtoId = serverConfig.getMinProtoId();
+                int maxProtoId = serverConfig.getMaxProtoId();
+                for (int i = minProtoId; i <= maxProtoId; i++) {
+                    protoGroupMap.put(i,groupId);
+                }
+            }
+        }
     }
 
 
@@ -151,6 +162,11 @@ public class ServerConfigManager {
         result.add(currentGroup);
 
         return result;
+    }
+
+    // 找到一组相同类型的实例
+    public Integer getGroupId(int protocolId) {
+        return protoGroupMap.getOrDefault(protocolId,null);
     }
 
     // 找到一组相同类型的实例
